@@ -53,23 +53,6 @@ public class AddEditTodoActivity extends AppCompatActivity {
             }
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        if(mode == 1){
-            id = getIntent().getIntExtra("item_id", -1);
-            if(id == -1){
-                Log.d("item_id","item id wrong");
-                Toast.makeText(this, "Item id wrong", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-
-            MyDatabase myDatabase = MyDatabase.getInstance(this);
-            try{
-                selectItem = myDatabase.todoDao()
-                        .getTodo(getIntent().getIntExtra("todo_id",-1));
-            }catch (Exception e){
-                Log.d("no id", "no id");
-                finish();
-            }
-        }
 
 
         til_title = findViewById(R.id.add_til_todo);
@@ -79,6 +62,32 @@ public class AddEditTodoActivity extends AppCompatActivity {
 
         ib_sDate = findViewById(R.id.add_ibtn_start_date);
         ib_dDate = findViewById(R.id.add_ibtn_due_date);
+
+        if(mode == 1){
+            id = getIntent().getIntExtra("todo_id", -1);
+            if(id == -1){
+                Log.d("todo_id","item id wrong");
+                Toast.makeText(this, "Item id wrong", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+
+            MyDatabase myDatabase = MyDatabase.getInstance(AddEditTodoActivity.this);
+            try{
+                selectItem = myDatabase.todoDao()
+                        .getTodo(getIntent().getIntExtra("todo_id",-1));
+            }catch (Exception e){
+                Log.d("no id", "no id");
+                finish();
+            }
+
+
+            til_title.getEditText().setText(selectItem.getTitle());
+            til_sDate.getEditText().setText(selectItem.getStart_date());
+            til_dDate.getEditText().setText(selectItem.getDue_date());
+            til_memo.getEditText().setText(selectItem.getMemo());
+
+
+        }
 
 
 
@@ -180,9 +189,24 @@ public class AddEditTodoActivity extends AppCompatActivity {
                     }
                     else {
 
-                        TodoItem newItem = new TodoItem(title, dDate, sDate, memo);
+
                         MyDatabase myDatabase = MyDatabase.getInstance(AddEditTodoActivity.this);
-                        myDatabase.todoDao().insertTodo(newItem);
+
+                        if(mode == 0){
+                            TodoItem newItem = new TodoItem(title, dDate, sDate, memo);
+                            myDatabase.todoDao().insertTodo(newItem);
+                            finish();
+                        }else{
+                           selectItem.setTitle(title);
+                           selectItem.setStart_date(sDate);
+                           selectItem.setDue_date(dDate);
+                           selectItem.setMemo(memo);
+
+                           myDatabase.todoDao().updateTodo(selectItem);
+                           Toast.makeText(AddEditTodoActivity.this, "저장 성공", Toast.LENGTH_SHORT).show();
+                           finish();
+                        }
+
 
                         finish();
                         break;
